@@ -5,7 +5,7 @@ from app.database import get_db
 from app import models
 from app.seguranca import decodificar_token
 
-oauth2 = OAuth2PasswordBearer(tokenUrl="auth/login")
+oauth2 = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 
 def usuario_logado(token: str = Depends(oauth2), db: Session = Depends(get_db)):
