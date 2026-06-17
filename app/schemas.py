@@ -76,3 +76,50 @@ class EstoqueResposta(BaseModel):
 
     class Config:
         from_attributes = True
+
+class ItemPedidoEntrada(BaseModel):
+    produto_id: int
+    quantidade: int
+
+
+class PedidoCriar(BaseModel):
+    unidade_id: int
+    canal_pedido: str
+    itens: list[ItemPedidoEntrada]
+
+
+class ItemPedidoResposta(BaseModel):
+    produto_id: int
+    quantidade: int
+    preco_unitario: float
+
+    class Config:
+        from_attributes = True
+
+
+class PedidoResposta(BaseModel):
+    id: int
+    usuario_id: int
+    unidade_id: int
+    canal_pedido: str
+    status: str
+    total: float
+    itens: list[ItemPedidoResposta]
+
+    class Config:
+        from_attributes = True
+
+class PagamentoEntrada(BaseModel):
+    pedido_id: int
+    aprovar: bool = True
+
+
+class PagamentoResposta(BaseModel):
+    id: int
+    pedido_id: int
+    status: str
+    valor: float
+    retorno_mock: str | None = None
+
+    class Config:
+        from_attributes = True
