@@ -1,0 +1,351 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-1111-2222-3333-444455556666",
+		"name": "Raizes do Nordeste - API",
+		"description": "Colecao de testes da API Back-end da rede Raizes do Nordeste. Organizada em pastas: Auth, Produtos, Pedidos, Pagamento, Erros. Ordem sugerida: rodar Auth/Login Admin primeiro (salva o token automaticamente), depois os demais. Variavel base_url = http://127.0.0.1:8000",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "T01 - Login Admin (valido)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+									"var json = pm.response.json();",
+									"pm.test('Retornou access_token', function () { pm.expect(json).to.have.property('access_token'); });",
+									"pm.collectionVariables.set('token_admin', json.access_token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {"mode": "raw", "raw": "{\n  \"email\": \"admin@teste.com\",\n  \"senha\": \"admin123\"\n}"},
+						"url": {"raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"]}
+					}
+				},
+				{
+					"name": "T02 - Login Cliente (valido)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+									"var json = pm.response.json();",
+									"pm.collectionVariables.set('token_cliente', json.access_token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {"mode": "raw", "raw": "{\n  \"email\": \"maria@teste.com\",\n  \"senha\": \"senha123\"\n}"},
+						"url": {"raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"]}
+					}
+				},
+				{
+					"name": "T03 - Login senha errada (401)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 401', function () { pm.response.to.have.status(401); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {"mode": "raw", "raw": "{\n  \"email\": \"maria@teste.com\",\n  \"senha\": \"senhaerrada\"\n}"},
+						"url": {"raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Produtos",
+			"item": [
+				{
+					"name": "T04 - Listar produtos (200)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+									"pm.test('Retornou uma lista', function () { pm.expect(pm.response.json()).to.be.an('array'); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/produtos", "host": ["{{base_url}}"], "path": ["produtos"]}
+					}
+				},
+				{
+					"name": "T05 - Criar produto como Admin (201)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 201', function () { pm.response.to.have.status(201); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{token_admin}}"}
+						],
+						"body": {"mode": "raw", "raw": "{\n  \"nome\": \"Bolo de Macaxeira\",\n  \"descricao\": \"Bolo tradicional de macaxeira\",\n  \"preco\": 9.50\n}"},
+						"url": {"raw": "{{base_url}}/produtos", "host": ["{{base_url}}"], "path": ["produtos"]}
+					}
+				},
+				{
+					"name": "T06 - Criar produto sem token (401)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 401', function () { pm.response.to.have.status(401); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {"mode": "raw", "raw": "{\n  \"nome\": \"Produto Sem Auth\",\n  \"preco\": 5.00\n}"},
+						"url": {"raw": "{{base_url}}/produtos", "host": ["{{base_url}}"], "path": ["produtos"]}
+					}
+				},
+				{
+					"name": "T07 - Criar produto como Cliente (403)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 403', function () { pm.response.to.have.status(403); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{token_cliente}}"}
+						],
+						"body": {"mode": "raw", "raw": "{\n  \"nome\": \"Produto Cliente\",\n  \"preco\": 5.00\n}"},
+						"url": {"raw": "{{base_url}}/produtos", "host": ["{{base_url}}"], "path": ["produtos"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Pedidos",
+			"item": [
+				{
+					"name": "T08 - Criar pedido valido (201)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 201', function () { pm.response.to.have.status(201); });",
+									"var json = pm.response.json();",
+									"pm.test('Status AGUARDANDO_PAGAMENTO', function () { pm.expect(json.status).to.eql('AGUARDANDO_PAGAMENTO'); });",
+									"pm.collectionVariables.set('pedido_id', json.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{token_cliente}}"}
+						],
+						"body": {"mode": "raw", "raw": "{\n  \"unidade_id\": 1,\n  \"canal_pedido\": \"APP\",\n  \"itens\": [\n    { \"produto_id\": 1, \"quantidade\": 2 }\n  ]\n}"},
+						"url": {"raw": "{{base_url}}/pedidos", "host": ["{{base_url}}"], "path": ["pedidos"]}
+					}
+				},
+				{
+					"name": "T09 - Listar pedidos por canal APP (200)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', function () { pm.response.to.have.status(200); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token_cliente}}"}
+						],
+						"url": {"raw": "{{base_url}}/pedidos?canal_pedido=APP", "host": ["{{base_url}}"], "path": ["pedidos"], "query": [{"key": "canal_pedido", "value": "APP"}]}
+					}
+				},
+				{
+					"name": "T10 - Pedido produto inexistente (404)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 404', function () { pm.response.to.have.status(404); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{token_cliente}}"}
+						],
+						"body": {"mode": "raw", "raw": "{\n  \"unidade_id\": 1,\n  \"canal_pedido\": \"APP\",\n  \"itens\": [\n    { \"produto_id\": 9999, \"quantidade\": 1 }\n  ]\n}"},
+						"url": {"raw": "{{base_url}}/pedidos", "host": ["{{base_url}}"], "path": ["pedidos"]}
+					}
+				},
+				{
+					"name": "T11 - Pedido estoque insuficiente (409)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 409', function () { pm.response.to.have.status(409); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{token_cliente}}"}
+						],
+						"body": {"mode": "raw", "raw": "{\n  \"unidade_id\": 1,\n  \"canal_pedido\": \"APP\",\n  \"itens\": [\n    { \"produto_id\": 1, \"quantidade\": 99999 }\n  ]\n}"},
+						"url": {"raw": "{{base_url}}/pedidos", "host": ["{{base_url}}"], "path": ["pedidos"]}
+					}
+				},
+				{
+					"name": "T12 - Pedido canal invalido (422)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 422', function () { pm.response.to.have.status(422); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{token_cliente}}"}
+						],
+						"body": {"mode": "raw", "raw": "{\n  \"unidade_id\": 1,\n  \"canal_pedido\": \"INVALIDO\",\n  \"itens\": [\n    { \"produto_id\": 1, \"quantidade\": 1 }\n  ]\n}"},
+						"url": {"raw": "{{base_url}}/pedidos", "host": ["{{base_url}}"], "path": ["pedidos"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "Pagamento",
+			"item": [
+				{
+					"name": "T13 - Pagamento aprovado (201 + pedido PAGO)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 201', function () { pm.response.to.have.status(201); });",
+									"var json = pm.response.json();",
+									"pm.test('Pagamento APROVADO', function () { pm.expect(json.status).to.eql('APROVADO'); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{token_cliente}}"}
+						],
+						"body": {"mode": "raw", "raw": "{\n  \"pedido_id\": {{pedido_id}},\n  \"aprovar\": true\n}"},
+						"url": {"raw": "{{base_url}}/pagamentos", "host": ["{{base_url}}"], "path": ["pagamentos"]}
+					}
+				},
+				{
+					"name": "T14 - Pagar pedido ja pago (409)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 409', function () { pm.response.to.have.status(409); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Authorization", "value": "Bearer {{token_cliente}}"}
+						],
+						"body": {"mode": "raw", "raw": "{\n  \"pedido_id\": {{pedido_id}},\n  \"aprovar\": true\n}"},
+						"url": {"raw": "{{base_url}}/pagamentos", "host": ["{{base_url}}"], "path": ["pagamentos"]}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{"key": "base_url", "value": "http://127.0.0.1:8000"},
+		{"key": "token_admin", "value": ""},
+		{"key": "token_cliente", "value": ""},
+		{"key": "pedido_id", "value": ""}
+	]
+}
