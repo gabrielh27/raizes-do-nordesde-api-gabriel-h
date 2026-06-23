@@ -27,6 +27,12 @@ def processar_pagamento(
         status_pagamento = "APROVADO"
         retorno = "Pagamento aprovado pelo gateway externo (mock)."
         pedido.status = "PAGO"
+
+        fidelidade = db.query(models.Fidelidade).filter(
+            models.Fidelidade.usuario_id == pedido.usuario_id
+        ).first()
+        if fidelidade is not None:
+            fidelidade.pontos += int(pedido.total // 10)
     else:
         status_pagamento = "RECUSADO"
         retorno = "Pagamento recusado pelo gateway externo (mock)."

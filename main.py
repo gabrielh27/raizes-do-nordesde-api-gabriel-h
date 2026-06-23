@@ -5,6 +5,7 @@ from app.rotas import usuarios, auth, unidades, produtos
 from app.rotas import usuarios, auth, unidades, produtos, estoque
 from app.rotas import usuarios, auth, unidades, produtos, estoque, pedidos
 from app.rotas import usuarios, auth, unidades, produtos, estoque, pedidos, pagamentos
+from app.rotas import usuarios, auth, unidades, produtos, estoque, pedidos, pagamentos, fidelidade
 
 Base.metadata.create_all(bind=engine)
 
@@ -17,6 +18,7 @@ app.include_router(produtos.router)
 app.include_router(estoque.router)
 app.include_router(pedidos.router)
 app.include_router(pagamentos.router)
+app.include_router(fidelidade.router)
 
 
 @app.get("/")

@@ -99,3 +99,31 @@ def buscar_pedido(
     if pedido is None:
         raise HTTPException(status_code=404, detail="Pedido nao encontrado.")
     return pedido
+
+STATUS_VALIDOS = [
+    "AGUARDANDO_PAGAMENTO", "PAGO", "EM_PREPARO",
+    "PRONTO", "ENTREGUE", "CANCELADO",
+]
+
+
+@router.patch("/{pedido_id}/status", response_model=schemas.PedidoResposta)
+def atualizar_status(
+    pedido_id: int,
+    dados: schemas.StatusEntrada,
+    db: Session = Depends(get_db),
+    usuario: models.Usuario = Depends(usuario_logado),
+):
+    pedido = db.query(models.Pedido).filter(models.Pedido.id == pedido_id).first()
+    if pedido is None:
+        raise HTTPException(status_code=404, detail="Pedido nao encontrado.")
+
+    if dados.status not in STATUS_VALIDOS:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Status invalido. Use um de: {STATUS_VALIDOS}",
+        )
+
+    pedido.status = dados.status
+    db.commit()
+    db.refresh(pedido)
+    return pedido

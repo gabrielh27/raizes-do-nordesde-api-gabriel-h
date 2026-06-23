@@ -123,3 +123,14 @@ class PagamentoResposta(BaseModel):
 
     class Config:
         from_attributes = True
+    
+class StatusEntrada(BaseModel):
+     status: str
+
+class FidelidadeResposta(BaseModel):
+    usuario_id: int
+    pontos: int
+    consentimento_lgpd: bool
+
+    class Config:
+        from_attributes = True
